@@ -1,0 +1,2 @@
+# ChessSolution
+Chess solution engine
