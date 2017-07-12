@@ -41,7 +41,7 @@ import java.util.Random;
  * check & mate condition, ohestalyönti & promotion, castling
  * https://en.wikipedia.org/wiki/Castling
  * the capture can only be made on the move immediately after the opposing pawn makes the double-step move; otherwise the right to capture it en passant is lost.
- * 
+ *
  */
 public class ChessKernel {
 
@@ -74,15 +74,15 @@ public class ChessKernel {
 	private boolean afterWhiteMove = false;
 	private String whiteKing = "85";
 	private String blackKing = "35"; // todo
-	
+
 
 	// must define special move codes for castling (e.g. 0000-0003) and
 	// ohestalyönnit (detect the move and remove the other PAWN, check column)
 	private int board[][] = new int[9][9];
-	
+
 	private boolean blackChecked = false;
 	private boolean whiteChecked = false;
-	
+
 	private boolean openCheckAgainstWhite = false;
 	private boolean openCheckAgainstBlack = false;
 
@@ -90,7 +90,7 @@ public class ChessKernel {
 		setBoard();
 	}
 
-	
+
 	private void setBoard() {
 
 		// BLACK pieces
@@ -108,27 +108,27 @@ public class ChessKernel {
 		 * board[8][6] = 4;
 		 */
 		board[7][5] = 9;
-		
+
 		int whiteKingRow = 8;
 		int whiteKingCol = 5;
-		
-		board[whiteKingRow][whiteKingCol] = 6;
+
+		board[whiteKingRow][whiteKingCol] = 6; // king
 		this.whiteKing = "" + whiteKingRow + whiteKingCol;
 	}
-	
+
 	/**
 	 * Move automatically without user input
 	 */
 	private void autoMove() {
 
 		if (blackTurn) {
-			System.out.print("\n ◾move: " + moveNumber
-					+ ". Possible moves: \n");
+			System.out.print("\n" + ++moveNumber + "."
+					+ " Possible moves (\u2B1BBLACK\u2B1B): \n");
 			possibleMovesBlack.clear();
 			afterBlackMove = false;
 		} else {
-			System.out.print("\n ◽move: " + ++moveNumber
-					+ ". Possible moves: \n");
+			System.out.print("\n" + ++moveNumber + "."
+					+ " Possible moves (\u2B1CWHITE\u2B1C): \n");
 			possibleMovesWhite.clear();
 			afterWhiteMove = false;
 		}
@@ -140,14 +140,14 @@ public class ChessKernel {
 			System.err.println("handle check black");
 			System.exit(-1);
 		}
-		
+
 		// white or black turn
 		for (int i = 1; i < 9; ++i) {
 			for (int j = 1; j < 9; ++j) {
 				int pieceValue = board[i][j]; // identify the piece (black/white
 												// & type)
 				if (pieceValue == 0) continue; // skip empty squares
-					
+
 				checkAllPossibleMoves(pieceValue, i, j);
 			}
 		}
@@ -162,65 +162,66 @@ public class ChessKernel {
 			System.err.println("check mate, n = " + numberOfMoves);
 			System.exit(-1); // TODO
 		}
-		
+
 		// do the move
 		int fromRow;
 		int fromCol;
 		int toRow;
 		int toCol;
-		
-		int fromPiece;
-		int toPiece;
-		
+
+		int fromPiece = 0;
+		int toPiece = 0;
+
 		String piece = "";
-			
+
 		openCheckAgainstWhite = true;
 		openCheckAgainstBlack = true;
 		int[] randomMove = null;
-		
+
 		ArrayList<Object> removalMoves = new ArrayList<>(); // moves to be removed from possible moves due to a threat
-		
+
 		if (!blackTurn) { // avoshakki -> reverse the move
-						 
+
 			for (int i = 0; i < possibleMovesWhite.size(); ++i) {
-			
+
 				int candidateMove[] = (int[]) possibleMovesWhite.get(i);
 				// test the move
-				
+
 				int i1 = candidateMove[0];
 				int j1 = candidateMove[1];
 				int i2 = candidateMove[2];
 				int j2 = candidateMove[3];
-				
+
 				fromPiece = board[i1][j1];
 				toPiece = board[i2][j2];
-								
-				board[i2][j2] = board[i1][j1]; // DO THE MOVE, O-O & O--O & el pase TODO 
+
+				board[i2][j2] = board[i1][j1]; // DO THE MOVE, O-O & O--O & el pase TODO
 				board[i1][j1] = 0; // original place will always be empty after the move
-				
+
+
 				listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove();
-				
-				if (blackThreadsAgainstWhiteKing.contains(whiteKing)) {													
-					removalMoves.add(candidateMove);											
+
+				if (blackThreadsAgainstWhiteKing.contains(whiteKing)) {
+					removalMoves.add(candidateMove);
 				}
-				board[i1][j1] = fromPiece;	// reverse the actual move due due to testing
+				board[i1][j1] = fromPiece;	// reverse the actual move due  to testing
 				board[i2][j2] = toPiece;
 			}
-			possibleMovesWhite.removeAll(removalMoves);			
+			possibleMovesWhite.removeAll(removalMoves);
 			numberOfMoves = possibleMovesWhite.size();
-			
+
 			for (int i = 0; i < numberOfMoves; ++i) {
-				
+
 				int pos[] = (int[]) possibleMovesWhite.toArray()[i];
-				
+
 				piece = pieceConverter(board[pos[0]][pos[1]], 0, 0);
-				System.out.print(" " + piece + "(" + pos[0] + "" + pos[1] + ""
-				+ pos[2] + "" + pos[3] + ") ");
-			
+				System.out.print((i + 1) + ")" + piece + pos[0] + pos[1] +
+				+ pos[2] + "" + pos[3] + " ");
+
 			}
-			
+
 			int randomMoveNumber = rand.nextInt(numberOfMoves);
-			
+
 			if (blackTurn) {
 				randomMove = (int[]) possibleMovesBlack.toArray()[randomMoveNumber];
 			} else {
@@ -232,19 +233,19 @@ public class ChessKernel {
 			fromCol = randomMove[1];
 			toRow = randomMove[2];
 			toCol = randomMove[3];
-			
+
 			fromPiece = board[fromRow][fromCol];
 			toPiece = board[toRow][toCol];
-			
+
 			piece = pieceConverter(fromPiece, 0, 0);
-				
-		}  else {
+
+		}  else { //BLACK TURN
 			// TODO case black king, blackTurn
 		}
-		
+
 		openCheckAgainstWhite  = false;
 		openCheckAgainstBlack  = false;
-		
+
 		if (!blackTurn) {
 			possibleMovesWhite.clear();
 			whiteThreadsAgainstBlackKing.clear();
@@ -268,17 +269,22 @@ public class ChessKernel {
 					System.out.println("possibility = " + pieceValue);
 					checkAllPossibleMoves(pieceValue, i, j);
 				} else if (!blackTurn && pieceValue > 0) {
-					
+
 					checkAllPossibleMoves(pieceValue, i, j);
 				}
 			}
 		}
 		printPossibleMoves = true;
-		System.out.println("\n Selecting a RANDOM move: " + piece + "("
+		System.out.println("\n  \u2192Selecting a RANDOM move: " + piece + "("
 				+ randomMove[0] + randomMove[1] + randomMove[2] + randomMove[3] + ")");
 
-		
-		
+
+			board[randomMove[0]][randomMove[1]] = 0;	//TODO, is this OK FIXME
+			board[randomMove[2]][randomMove[3]] = fromPiece;
+
+
+
+
 		printCurrentCheckBoardPosition();
 		blackTurn = !blackTurn;
 	}
@@ -291,10 +297,10 @@ public class ChessKernel {
 
 		while (isBasicMovePossible(i, j, ++r + i, ++c + j)) {
 			addPossibleMovesAndThreads(i, j, i + r, j + c);
-			
+
 			if (board[i + r][j + c] != 0) { // EAT!
 				break; // allow only one eat
-			}			
+			}
 		}
 		r = 0;
 		c = 0;
@@ -313,14 +319,14 @@ public class ChessKernel {
 			if (board[i + r][j + c] != 0) { // EAT!
 				break; // allow only one possible eat // TODO, check B-eat
 						// problem
-			}	
+			}
 		}
 		r = 0;
 		c = 0;
 
 		while (isBasicMovePossible(i, j, ++r + i, --c + j)) {
 			addPossibleMovesAndThreads(i, j, i + r, j + c);
-			if (board[i + r][j + c] != 0) { // EAT!				
+			if (board[i + r][j + c] != 0) { // EAT!
 				break;
 			}
 		}
@@ -328,7 +334,7 @@ public class ChessKernel {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fromRow
 	 * @param fromCol
 	 * @param toRow
@@ -343,10 +349,10 @@ public class ChessKernel {
 					+ " toRow = " + toRow + " toCo= " + toCol);
 
 		String piece = pieceConverter(board[fromRow][fromCol], fromRow, fromCol);
-		
+
 		String fromMove = "" + fromRow + fromCol;
 		String toMove = "" + toRow + toCol;
-		
+
 		if (toRow > 8 || toRow < 1) {
 			if (DEBUG)
 				System.err.println("checking, toRow: " + toRow);
@@ -370,7 +376,7 @@ public class ChessKernel {
 			if (whiteThreadsAgainstBlackKing.contains(fromMove)) {
 				if (DEBUG) System.err.println("CHECK for black");
 				blackChecked = true;
-			} 
+			}
 			if (whiteThreadsAgainstBlackKing.contains(toMove)) {
 				if (DEBUG) System.err.println("SHAKKI for black, not possible: " + toMove);
 				return false;
@@ -379,7 +385,7 @@ public class ChessKernel {
 			if (blackThreadsAgainstWhiteKing.contains(fromMove)) {
 				if (DEBUG) System.err.println("CHECK for WHITE");
 				whiteChecked = true;
-			} 
+			}
 			if (blackThreadsAgainstWhiteKing.contains(toMove)) {
 				return false;
 			}
@@ -387,34 +393,34 @@ public class ChessKernel {
 		return true;
 	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * @param fromRow
 	 * @param fromCol
 	 * @param toRow
 	 * @param toCol
 	 */
 	private void addPossibleMovesAndThreads(int fromRow, int fromCol, int toRow, int toCol) {
-		
+
 		String piece = pieceConverter(board[fromRow][fromCol], fromRow, fromCol);
 		if (DEBUG) 			System.err.println("checking: " + piece);
-		
+
 		int move[] = new int[4];
 		move[0] = fromRow;
 		move[1] = fromCol;
 		move[2] = toRow;
 		move[3] = toCol;
-		
+
 		if (board[fromRow][fromCol] < 0) { // black piece
-			
+
 			if (blackTurn && !afterBlackMove) possibleMovesBlack.add(move);
-			
+
 			if (afterBlackMove || openCheckAgainstWhite) { // black or white has just moved, so add all the current threads against white king
 				blackThreadsAgainstWhiteKing.add("" + toRow + "" + toCol);
 				if (DEBUG) System.err.println("adding new thread: = " + toRow + "" + toCol);
 			 // TODO check threat (special case) for white KING
-				
+
 				if (board[toRow][toCol] == 6) {
 					if (fromRow == toRow && fromCol < toCol) {
 						blackThreadsAgainstWhiteKing.add("" + toRow + "" + ++toCol); // check; extend the threat!
@@ -425,9 +431,9 @@ public class ChessKernel {
 					} else if (fromCol == toCol && fromRow < toRow) {
 						blackThreadsAgainstWhiteKing.add("" + ++toRow + "" + toCol); // check; extend the threat!
 					}
-					
+
 					if (board[fromRow][fromCol] == -4 || board[fromRow][fromCol] == -9) { // bishop or queen threats
-						
+
 						if (fromRow > toRow && fromCol < toCol) {
 							blackThreadsAgainstWhiteKing.add("" + toRow-- + "" + toCol++); // check; extend the threat!
 						} else if (fromRow < toRow && fromCol < toCol) {
@@ -440,30 +446,30 @@ public class ChessKernel {
 					}
 				}
 			}
-			
+
 			if (blackTurn && printPossibleMoves) {
 				System.out.print(piece + "(" + fromRow + "" + fromCol + ""
 						+ toRow + "" + toCol + ") ");
 			}
 		} else if (board[fromRow][fromCol] > 0) { // white piece
-			
+
 			if (!blackTurn && !afterWhiteMove) possibleMovesWhite.add(move); // adding a possible move
-			
+
 			if (afterWhiteMove) {  // white has just moved, so add all the current threads against black king
 				whiteThreadsAgainstBlackKing.add("" + toRow + "" + toCol);
 				 // TODO check threat (special case) for BLACK KING
 				if (board[toRow][toCol] == -6) {
-					
-					if (fromRow == toRow && fromCol < toCol) {						
-						whiteThreadsAgainstBlackKing.add("" + toRow + "" + ++toCol); // check; extend the threat!						
-					} else if (fromRow == toRow && fromCol > toCol) {						
-						whiteThreadsAgainstBlackKing.add("" + toRow + "" + --toCol); // check; extend the threat!						
-					} else if (fromCol == toCol && fromRow > toRow) {						
-						whiteThreadsAgainstBlackKing.add("" + --toRow + "" + toCol); // check; extend the threat!						
-					} else if (fromCol == toCol && fromRow < toRow) {						
-						whiteThreadsAgainstBlackKing.add("" + ++toRow + "" + toCol); // check; extend the threat!						
+
+					if (fromRow == toRow && fromCol < toCol) {
+						whiteThreadsAgainstBlackKing.add("" + toRow + "" + ++toCol); // check; extend the threat!
+					} else if (fromRow == toRow && fromCol > toCol) {
+						whiteThreadsAgainstBlackKing.add("" + toRow + "" + --toCol); // check; extend the threat!
+					} else if (fromCol == toCol && fromRow > toRow) {
+						whiteThreadsAgainstBlackKing.add("" + --toRow + "" + toCol); // check; extend the threat!
+					} else if (fromCol == toCol && fromRow < toRow) {
+						whiteThreadsAgainstBlackKing.add("" + ++toRow + "" + toCol); // check; extend the threat!
 					}
-								
+
 					if (board[fromRow][fromCol] == 4 || board[fromRow][fromCol] == 9) { // bishop or queen threats
 						if (fromRow > toRow && fromCol < toCol) {
 							whiteThreadsAgainstBlackKing.add("" + toRow-- + "" + toCol++); // check; extend the threat!
@@ -475,13 +481,13 @@ public class ChessKernel {
 							whiteThreadsAgainstBlackKing.add("" + toRow-- + "" + toCol--); // check; extend the threat!
 						}
 					}
-				}			
-			}			
-		} 
+				}
+			}
+		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fromRow
 	 * @param fromCol
 	 * @param toRow
@@ -491,15 +497,15 @@ public class ChessKernel {
 	private boolean kingMove(int fromRow, int fromCol, int toRow, int toCol) {
 
 		boolean possible = isBasicMovePossible(fromRow, fromCol, toRow, toCol);
-		if (possible) {		
+		if (possible) {
 			addPossibleMovesAndThreads(fromRow, fromCol, toRow, toCol);
 		} else return false;
- 		
+
 		return true;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fromRow
 	 * @param fromCol
 	 * @param toRow
@@ -516,7 +522,7 @@ public class ChessKernel {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fromRow
 	 * @param fromCol
 	 * @param toRow
@@ -590,47 +596,49 @@ public class ChessKernel {
 	private String pieceConverter(int value, int column, int row) {
 
 		if (value == -1)
-			return "♟"; // Pawn
+			return "♟ "; // Pawn
 		if (value == -3)
-			return "♞"; // kNight
+			return "♞ "; // kNight
 		if (value == -4)
-			return "♝"; // Bishop
+			return "♝ "; // Bishop
 		if (value == -5)
-			return "♜"; // Rook
+			return "♜ "; // Rook
 		if (value == -6)
-			return "♚"; // King
+			return "♚ "; // King
 		if (value == -9)
-			return "♛"; // Queen
+			return "♛ "; // Queen
 
 		if (value == 1)
-			return "♙"; // Pawn
+			return "♙ "; // Pawn
 		if (value == 3)
-			return "♘"; // kNight
+			return "♘ "; // kNight
 		if (value == 4)
-			return "♗"; // Bishop
+			return "♗ "; // Bishop
 		if (value == 5)
-			return "♖"; // Rook
+			return "♖ "; // Rook
 		if (value == 6)
-			return "♔"; // King
+			return "♔ "; // King
 		if (value == 9)
-			return "♕"; // Queen◽
+			return "♕ "; // Queen◽
 
 		if (column % 2 == 0 && row % 2 != 0) {
-			return "◼";
+
+			return "\u2B1B "; //black square
 		}
 		if (column % 2 != 0 && row % 2 == 0) {
-			return "◼";
+
+			return "\u2B1B "; // black square
 		}
-		return "⚝"; // "◻"; // "◊";◽⧠⚪
+		return "\u2B1C "; // white square
 
 		// return "" + value;
 	}
 
-	
+
 	private boolean listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove() {
-		
+
 		blackThreadsAgainstWhiteKing.clear();
-		
+
 		for (int i = 1; i < 9; ++i) {
 			for (int j = 1; j < 9; ++j) {
 				int pieceValue = board[i][j]; // identify the piece (black/white
@@ -638,24 +646,24 @@ public class ChessKernel {
 				switch (pieceValue) {
 				case -9:
 					queen(i, j);
-					break;		
+					break;
 				case -5:
 					rook(i, j);
 					break;
 				case -4:
 					bishop(i, j);
-					break;			
-				}					
+					break;
+				}
 			}
 		}
-		return false;		
+		return false;
 	}
-	
+
 
 	private boolean listWhiteThreatsAgainstBlackKingAfterBlackCandidateMove() {
-		
+
 		whiteThreadsAgainstBlackKing.clear();
-		
+
 		for (int i = 1; i < 9; ++i) {
 			for (int j = 1; j < 9; ++j) {
 				int pieceValue = board[i][j]; // identify the piece (black/white
@@ -663,22 +671,22 @@ public class ChessKernel {
 				switch (pieceValue) {
 				case -9:
 					queen(i, j);
-					break;		
+					break;
 				case -5:
 					rook(i, j);
 					break;
 				case -4:
 					bishop(i, j);
-					break;			
-				}					
+					break;
+				}
 			}
 		}
-		return false;		
+		return false;
 	}
 
-	
+
 	/**
-	 * 
+	 *
 	 * @param pieceValue
 	 * @param fromRow
 	 * @param fromCol
@@ -689,7 +697,7 @@ public class ChessKernel {
 		if (pieceValue != - 1 ) {
 			pieceValue = Math.abs(pieceValue);
 		}
-		
+
 		switch (pieceValue) {
 		case 9:
 			queen(fromRow, fromCol);
@@ -747,7 +755,7 @@ public class ChessKernel {
 
 	// reinforced learning, heuristical game function
 
-	
+
 	private void printCurrentCheckBoardPosition() {
 		System.out.println("");
 
@@ -758,21 +766,21 @@ public class ChessKernel {
 		for (int r = 1; r < 9; ++r) {
 			board[r][0] = r;
 		}
-
+		//System.out.print("\u200B"); // zero-width space
 		for (int r = 0; r < 9; ++r) {
-
+			System.out.print("");
 			for (int c = 0; c < 9; ++c) {
 				if (c == 1)
-					System.out.print(" ");
+					System.out.print("");
 
 				if (r == 0 && c == 0) {
-					System.out.print("▫");
+					System.out.print(" ");
 				} else if (r == 0 || c == 0) {
 					if (c % 3 == 0) {
-						System.out.print(board[r][c]);
+						System.out.print(" "+board[r][c]);
 
 					} else {
-						System.out.print("▫" + board[r][c]);
+						System.out.print(" " + board[r][c]);
 					}
 
 				} else {
@@ -784,7 +792,7 @@ public class ChessKernel {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fromRow
 	 * @param fromCol
 	 * @return
