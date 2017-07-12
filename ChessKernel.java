@@ -19,7 +19,7 @@ import java.util.Random;
  * 12) castling (two ways, short & long)
  * 13) ohestalyönti
  * 14) repetition (three fold etc.) & other end rules e.g. stalemate
- * 15) promotion (pawn to queen OR knight (only if chessmate) )
+ * 15) promotion (pawn to queen OR knight (only if chessmate threat) )
  * 16) list of allowed moves
  * 17) choosing random move from the allowed list
  * 18) from random to chessmate, listing the path and updating UI
@@ -109,6 +109,7 @@ public class ChessKernel {
 		 */
 		board[7][5] = 9;
 		board[7][1] = 1;
+		board[2][1] = 1;
 
 		int whiteKingRow = 8;
 		int whiteKingCol = 5;
@@ -284,8 +285,19 @@ public class ChessKernel {
 
 
 			board[randomMove[0]][randomMove[1]] = 0;	//TODO, is this OK FIXME
-			board[randomMove[2]][randomMove[3]] = fromPiece;
 
+
+			if (randomMove[2] == 1 && fromPiece == 1) {
+				System.err.println("White pawn promoted to queen!");
+				board[randomMove[2]][randomMove[3]] = 9; // promotion to queen
+			} else {
+				board[randomMove[2]][randomMove[3]] = fromPiece;
+			} else if (randomMove[2] == 8 && fromPiece == -1) {
+				System.err.println("Black pawn promoted to queen!");
+				board[randomMove[2]][randomMove[3]] = -9; // promotion to queen
+			} else {
+				board[randomMove[2]][randomMove[3]] = fromPiece;
+			}
 
 		printCurrentCheckBoardPosition();
 		blackTurn = !blackTurn;
@@ -551,10 +563,7 @@ public class ChessKernel {
 		// TODO handle ohestalyönti el passe, toRow == 9 ?!
 		if (!blackTurn) { // WHITE
 			if (firstDif == -1 && secondDif == 0) {
-				if (toRow == 1) {
-					System.err.println("White pawn promoted to queen!");
-					board[toRow][toCol] = 9; // promotion to queen
-				}
+				//FIXME
 				return true;
 			}
 			if (fromRow == 7 && firstDif == -2 && secondDif == 0) {
@@ -579,10 +588,7 @@ public class ChessKernel {
 
 			if (firstDif == 1 && secondDif == 0) {
 
-				if (toRow == 8) {
-					System.err.println("Black pawn promoted to queen!");
-					board[toRow][toCol] = -9; // promotion to queen
-				}
+				//FIXME
 				return true;
 			}
 			if (fromRow == 2 && firstDif == 2 && secondDif == 0) {
