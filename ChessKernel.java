@@ -108,11 +108,13 @@ public class ChessKernel {
 		 * board[8][6] = 4;
 		 */
 		board[7][5] = 9;
+		board[7][1] = 1;
 
 		int whiteKingRow = 8;
 		int whiteKingCol = 5;
 
 		board[whiteKingRow][whiteKingCol] = 6; // king
+		board[8][2] = 3; // knight
 		this.whiteKing = "" + whiteKingRow + whiteKingCol;
 	}
 
@@ -191,7 +193,7 @@ public class ChessKernel {
 				int j1 = candidateMove[1];
 				int i2 = candidateMove[2];
 				int j2 = candidateMove[3];
-
+				//System.out.println("candidateMove white="+i1+j1+i2+j2);
 				fromPiece = board[i1][j1];
 				toPiece = board[i2][j2];
 
@@ -202,9 +204,10 @@ public class ChessKernel {
 				listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove();
 
 				if (blackThreadsAgainstWhiteKing.contains(whiteKing)) {
+					//System.out.println("removed="+i1+j1+i2+j2);
 					removalMoves.add(candidateMove);
 				}
-				board[i1][j1] = fromPiece;	// reverse the actual move due  to testing
+				board[i1][j1] = fromPiece;	// FIXME, reverse the actual move due  to testing
 				board[i2][j2] = toPiece;
 			}
 			possibleMovesWhite.removeAll(removalMoves);
@@ -215,18 +218,19 @@ public class ChessKernel {
 				int pos[] = (int[]) possibleMovesWhite.toArray()[i];
 
 				piece = pieceConverter(board[pos[0]][pos[1]], 0, 0);
-				System.out.print((i + 1) + ")" + piece + pos[0] + pos[1] +
+				System.out.print((" " + (i + 1)) + ")" + piece + pos[0] + pos[1] +
 				+ pos[2] + "" + pos[3] + " ");
+				if ((i + 1) % 10 == 0) System.out.println(); // just a new line for clarity
 
 			}
 
 			int randomMoveNumber = rand.nextInt(numberOfMoves);
 
-			if (blackTurn) {
-				randomMove = (int[]) possibleMovesBlack.toArray()[randomMoveNumber];
-			} else {
+			//if (blackTurn) { //FIXME, it's white's turn here!
+				//randomMove = (int[]) possibleMovesBlack.toArray()[randomMoveNumber];
+			//} else {
 				randomMove = (int[]) possibleMovesWhite.toArray()[randomMoveNumber];
-			}
+			//}
 
 			// do the move
 			fromRow = randomMove[0];
@@ -266,10 +270,10 @@ public class ChessKernel {
 					continue; // skip empty squares
 
 				if (blackTurn && pieceValue < 0) {
-					System.out.println("possibility = " + pieceValue);
+					//System.out.println("possibility = " + pieceValue);
 					checkAllPossibleMoves(pieceValue, i, j);
 				} else if (!blackTurn && pieceValue > 0) {
-
+					//System.out.println("possibility = " + pieceValue);
 					checkAllPossibleMoves(pieceValue, i, j);
 				}
 			}
@@ -281,8 +285,6 @@ public class ChessKernel {
 
 			board[randomMove[0]][randomMove[1]] = 0;	//TODO, is this OK FIXME
 			board[randomMove[2]][randomMove[3]] = fromPiece;
-
-
 
 
 		printCurrentCheckBoardPosition();
@@ -404,7 +406,7 @@ public class ChessKernel {
 	private void addPossibleMovesAndThreads(int fromRow, int fromCol, int toRow, int toCol) {
 
 		String piece = pieceConverter(board[fromRow][fromCol], fromRow, fromCol);
-		if (DEBUG) 			System.err.println("checking: " + piece);
+		if (DEBUG)			System.err.println("checking: " + piece);
 
 		int move[] = new int[4];
 		move[0] = fromRow;
@@ -515,10 +517,12 @@ public class ChessKernel {
 	private boolean knightMove(int fromRow, int fromCol, int toRow, int toCol) {
 
 		boolean possible = isBasicMovePossible(fromRow, fromCol, toRow, toCol);
-		if (!possible)
-			return false;
+		//System.out.println("knight possible = " + possible);
+		if (possible) {
+			addPossibleMovesAndThreads(fromRow, fromCol, toRow, toCol);
+		} else return false;
 
-		return possible;
+		return true;
 	}
 
 	/**
@@ -535,8 +539,13 @@ public class ChessKernel {
 		int secondDif = toCol - fromCol;
 		boolean accepted = false;
 		boolean possible = isBasicMovePossible(fromRow, fromCol, toRow, toCol);
-		if (!possible)
-			return false;
+
+
+		if (possible) {
+			addPossibleMovesAndThreads(fromRow, fromCol, toRow, toCol);
+		}
+
+
 		// add collision detection! END MOVE IF COLLISION
 
 		// TODO handle ohestalyönti el passe, toRow == 9 ?!
@@ -720,6 +729,7 @@ public class ChessKernel {
 			bishop(fromRow, fromCol);
 			break;
 		case 3:
+
 			knightMove(fromRow, fromCol, fromRow + 1, fromCol + 2);
 			knightMove(fromRow, fromCol, fromRow - 1, fromCol + 2);
 
