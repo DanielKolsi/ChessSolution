@@ -552,11 +552,6 @@ public class ChessKernel {
 	 * @return
 	 */
 	private boolean kingMove(int fromRow, int fromCol, int toRow, int toCol) {
-			System.out.println("KINGMOVE-fromRow="+fromRow);
-			if (fromRow != 4 && fromRow != 8) {
-				System.out.println("KINGMOVE-fromRow-ERROR="+fromRow);
-				System.exit(-1);
-			}
 
 		boolean possible = isBasicMovePossible(fromRow, fromCol, toRow, toCol);
 
@@ -673,7 +668,7 @@ public class ChessKernel {
 		if (value == -6)
 			return "♚ "; // King
 		if (value == -9)
-			return "X♛ "; // Queen //FIXME, why king turns queen?!
+			return "♛ "; // Queen 
 
 		if (value == 1)
 			return "♙ "; // Pawn
@@ -736,7 +731,7 @@ public class ChessKernel {
 				int pieceValue = board[i][j]; // identify the piece (black/white
 												// & type)
 				switch (pieceValue) {
-				case 9:
+				case 9: // white queen
 					queen(i, j);
 					break;
 				case 5:
@@ -765,30 +760,24 @@ public class ChessKernel {
 		if (pieceValue != - 1 ) {
 			pieceValue = Math.abs(pieceValue);
 		}
-	/*	if (pieceValue < 0) {
-			System.out.println("piecevalue="+pieceValue);
-			return;
-		}
-*/
+
 
 
 		switch (pieceValue) {
 		case 9:
-			//queen(fromRow, fromCol);
+			queen(fromRow, fromCol);
 			break;
 		case 6:
 			// special cases: EAT (OK), CHESS (!OK), OWN (!OK)
-			System.out.println("KING MOVE");
-			//kingMove(fromRow, fromCol, fromRow + 1, fromCol);
 
-
+			kingMove(fromRow, fromCol, fromRow + 1, fromCol);
 			kingMove(fromRow, fromCol, fromRow + 1, fromCol + 1);
-			/*kingMove(fromRow, fromCol, fromRow, fromCol + 1);
+			kingMove(fromRow, fromCol, fromRow, fromCol + 1);
 			kingMove(fromRow, fromCol, fromRow - 1, fromCol);
 			kingMove(fromRow, fromCol, fromRow - 1, fromCol + 1);
 			kingMove(fromRow, fromCol, fromRow - 1, fromCol - 1);
 			kingMove(fromRow, fromCol, fromRow, fromCol - 1);
-			kingMove(fromRow, fromCol, fromRow + 1, fromCol - 1);*/
+			kingMove(fromRow, fromCol, fromRow + 1, fromCol - 1);
 			break;
 		case 5:
 			rook(fromRow, fromCol);
