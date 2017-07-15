@@ -205,14 +205,13 @@ public class ChessKernel {
 				board[i2][j2] = board[i1][j1]; // DO THE MOVE, O-O & O--O & el pase TODO
 				board[i1][j1] = 0; // original place will always be empty after the move
 
-
 				listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove();
 
 				if (blackThreadsAgainstWhiteKing.contains(whiteKing)) {
 					//System.out.println("removed="+i1+j1+i2+j2);
 					removalMoves.add(candidateMove);
 				}
-				board[i1][j1] = fromPiece;	// FIXME, reverse the actual move due  to testing
+				board[i1][j1] = fromPiece;	// reverse the actual move; it was just to check the candidates!
 				board[i2][j2] = toPiece;
 			}
 			possibleMovesWhite.removeAll(removalMoves);
@@ -230,7 +229,10 @@ public class ChessKernel {
 			randomMove = (int[]) possibleMovesWhite.toArray()[randomMoveNumber];
 
 		}  else { //BLACK TURN
-			for (int i = 0; i < possibleMovesBlack.size(); ++i) {
+			
+			randomMove = possibleMoves(false, blackKing, possibleMovesBlack, whiteThreadsAgainstBlackKing, removalMoves, board);
+			
+			/*for (int i = 0; i < possibleMovesBlack.size(); ++i) {
 
 				int candidateMove[] = (int[]) possibleMovesBlack.get(i);
 				// test the move
@@ -266,8 +268,10 @@ public class ChessKernel {
 				if ((i + 1) % 10 == 0) System.out.println(); // just a new line for clarity
 			}
 
-			int randomMoveNumber = rand.nextInt(numberOfMoves);
+			int randomMoveNumber = rand.nextInt(numberOfMoves); //FIXME: bound must be positive
 			randomMove = (int[]) possibleMovesBlack.toArray()[randomMoveNumber];
+		*/
+		
 		} //eof black turn
 
 
@@ -303,10 +307,6 @@ public class ChessKernel {
 			for (int j = 1; j < 9; ++j) {
 				int pieceValue = board[i][j]; // identify the piece (black/white
 												// & type)
-				if (pieceValue == -6) {
-					System.out.println("BLACK KING = row" + i);
-					//continue;
-				}
 				if (pieceValue == 0)
 					continue; // skip empty squares
 
@@ -343,6 +343,69 @@ public class ChessKernel {
 
 		printCurrentCheckBoardPosition();
 		blackTurn = !blackTurn;
+	}
+	
+	
+	private int[] possibleMoves(boolean white, String kingPosition, ArrayList<Object> possibleMoves, ArrayList<Object> kingThreads, ArrayList<Object> removalMoves, int board[][]) {
+		
+		
+		int numberOfMoves;
+		String piece;
+		int [] randomMove;
+		int fromPiece;
+		int toPiece;
+		
+		for (int i = 0; i < possibleMoves.size(); ++i) {
+
+			int candidateMove[] = (int[]) possibleMoves.get(i);
+			int i1 = candidateMove[0];
+			int j1 = candidateMove[1];
+			int i2 = candidateMove[2];
+			int j2 = candidateMove[3];
+						
+					
+			fromPiece = board[i1][j1];
+			toPiece = board[i2][j2];
+			// test the candidate move
+			board[i2][j2] = board[i1][j1]; // DO THE MOVE, O-O & O--O & el pase TODO
+			board[i1][j1] = 0; // original place will always be empty after the move
+								
+			if (white) {
+				listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove();
+				
+			} else {
+				listWhiteThreatsAgainstBlackKingAfterBlackCandidateMove();
+			}
+			
+			if (kingThreads.contains(kingPosition)) {	
+				removalMoves.add(candidateMove);
+			}			
+			board[i1][j1] = fromPiece;	// reverse the actual move; it was just to check the candidates!
+			board[i2][j2] = toPiece;
+		}
+		
+		possibleMoves.removeAll(removalMoves);
+		numberOfMoves = possibleMoves.size();
+
+		for (int i = 0; i < numberOfMoves; ++i) {
+			int pos[] = (int[]) possibleMoves.toArray()[i];
+			
+			/*int pos[] = (int[]) possibleMovesBlack.toArray()[i];
+			piece = pieceConverter(board[pos[0]][pos[1]], 0, 0);*/
+			
+			//System.out.println("value="pos[0]][pos[1]]);
+			piece = pieceConverter(board[pos[0]][pos[1]], 0, 0);
+			System.out.print((" " + (i + 1)) + ")" + piece + pos[0] + pos[1] + pos[2] + "" + pos[3] + " ");
+			
+			if ((i + 1) % 10 == 0) {
+				System.out.println(); // just a new line for clarity
+			}
+		}
+
+		int randomMoveNumber = rand.nextInt(numberOfMoves);
+		randomMove = (int[]) possibleMoves.toArray()[randomMoveNumber];
+
+		return randomMove;
 	}
 
 	// check all possible moves
@@ -401,7 +464,7 @@ public class ChessKernel {
 			int toCol) {
 
 
-		//if (DEBUG)
+		if (DEBUG)
 			System.err.println("***-KING-fromRow = " + fromRow + "fromCol=" + fromCol
 					+ " toRow = " + toRow + " toCol= " + toCol);
 
@@ -633,7 +696,6 @@ public class ChessKernel {
 		} else { // BLACK
 
 			if (firstDif == 1 && secondDif == 0) {
-
 				//FIXME
 				return true;
 			}
@@ -668,7 +730,7 @@ public class ChessKernel {
 		if (value == -6)
 			return "♚ "; // King
 		if (value == -9)
-			return "♛ "; // Queen 
+			return "♛ "; // Queen
 
 		if (value == 1)
 			return "♙ "; // Pawn
@@ -695,8 +757,9 @@ public class ChessKernel {
 
 		// return "" + value;
 	}
-
-
+	
+	
+	
 	private boolean listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove() {
 
 		blackThreadsAgainstWhiteKing.clear();
