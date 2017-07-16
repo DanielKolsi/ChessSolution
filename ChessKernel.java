@@ -69,7 +69,7 @@ public class ChessKernel {
 	private Random rand = new Random();
 	private boolean printPossibleMoves = true;
 
-	//private boolean blackTurn = false;
+	private boolean blackTurn = false; // TODO, change to whiteTurn
 	private boolean afterBlackMove = false; // only for threads
 	private boolean afterWhiteMove = false;
 	private String blackKing = "45"; // TODO, FIXME
@@ -177,7 +177,6 @@ public class ChessKernel {
 		int toCol;
 
 		int fromPiece;
-		int toPiece;
 		String piece;
 
 		openCheckAgainstWhite = true;
@@ -188,8 +187,8 @@ public class ChessKernel {
 
 		if (!blackTurn) { // avoshakki -> reverse the move
 			randomMove = possibleMoves(true, whiteKing, possibleMovesWhite, blackThreadsAgainstWhiteKing, removalMoves, board);
-		}  else { //BLACK TURN
-			randomMove = possibleMoves(false, blackKing, possibleMovesBlack, whiteThreadsAgainstBlackKing, removalMoves, board);
+		}  else { //BLACK TURN	
+			randomMove = possibleMoves(false, blackKing, possibleMovesBlack, whiteThreadsAgainstBlackKing, removalMoves, board);					
 		} //eof black turn
 
 		// do the move
@@ -199,7 +198,7 @@ public class ChessKernel {
 		toCol = randomMove[3];
 
 		fromPiece = board[fromRow][fromCol];
-		toPiece = board[toRow][toCol];
+		//toPiece = board[toRow][toCol];
 
 		piece = pieceConverter(fromPiece, 0, 0);
 
@@ -259,17 +258,17 @@ public class ChessKernel {
 		printCurrentCheckBoardPosition();
 		blackTurn = !blackTurn;
 	}
-
-
+	
+	
 	private int[] possibleMoves(boolean white, String kingPosition, ArrayList<Object> possibleMoves, ArrayList<Object> kingThreads, ArrayList<Object> removalMoves, int board[][]) {
-
-
+		
+		
 		int numberOfMoves;
 		String piece;
 		int [] randomMove;
 		int fromPiece;
 		int toPiece;
-
+		
 		for (int i = 0; i < possibleMoves.size(); ++i) {
 
 			int candidateMove[] = (int[]) possibleMoves.get(i);
@@ -277,41 +276,41 @@ public class ChessKernel {
 			int j1 = candidateMove[1];
 			int i2 = candidateMove[2];
 			int j2 = candidateMove[3];
-
-
+						
+					
 			fromPiece = board[i1][j1];
 			toPiece = board[i2][j2];
 			// test the candidate move
 			board[i2][j2] = board[i1][j1]; // DO THE MOVE, O-O & O--O & el pase TODO
 			board[i1][j1] = 0; // original place will always be empty after the move
-
+								
 			if (white) {
 				listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove();
-
+				
 			} else {
 				listWhiteThreatsAgainstBlackKingAfterBlackCandidateMove();
 			}
-
-			if (kingThreads.contains(kingPosition)) {
+			
+			if (kingThreads.contains(kingPosition)) {	
 				removalMoves.add(candidateMove);
-			}
+			}			
 			board[i1][j1] = fromPiece;	// reverse the actual move; it was just to check the candidates!
 			board[i2][j2] = toPiece;
 		}
-
+		
 		possibleMoves.removeAll(removalMoves);
 		numberOfMoves = possibleMoves.size();
 
 		for (int i = 0; i < numberOfMoves; ++i) {
 			int pos[] = (int[]) possibleMoves.toArray()[i];
-
+			
 			/*int pos[] = (int[]) possibleMovesBlack.toArray()[i];
 			piece = pieceConverter(board[pos[0]][pos[1]], 0, 0);*/
-
+			
 			//System.out.println("value="pos[0]][pos[1]]);
 			piece = pieceConverter(board[pos[0]][pos[1]], 0, 0);
 			System.out.print((" " + (i + 1)) + ")" + piece + pos[0] + pos[1] + pos[2] + "" + pos[3] + " ");
-
+			
 			if ((i + 1) % 10 == 0) {
 				System.out.println(); // just a new line for clarity
 			}
@@ -672,9 +671,9 @@ public class ChessKernel {
 
 		// return "" + value;
 	}
-
-
-
+	
+	
+	
 	private boolean listBlackThreatsAgainstWhiteKingAfterWhiteCandidateMove() {
 
 		blackThreadsAgainstWhiteKing.clear();
